@@ -1,0 +1,85 @@
+- name: Check reachable
+  hosts: all
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
+
+- name: Update Lacus
+  hosts: lacus
+  become: true
+  become_method: sudo
+  become_user: lacus
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+  tasks:
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/lacus"
+
+    - name: Update Lacus
+      ansible.builtin.command: "poetry run update --yes"
+      args:
+        chdir: "{{ project_dir }}"
+
+- name: Update Lookyloo
+  hosts: lookyloo
+  become: true
+  become_method: sudo
+  become_user: lookyloo
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+  tasks:
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/lookyloo"
+
+    - name: Update Lookyloo
+      ansible.builtin.command: "poetry run update --yes"
+      args:
+        chdir: "{{ project_dir }}"
+
+- name: Update Lookyloo Monitoring
+  hosts: monitoring
+  become: true
+  become_method: sudo
+  become_user: lookyloo
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+  tasks:
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/monitoring"
+
+    - name: Update Lookyloo
+      ansible.builtin.command: "poetry run update --yes"
+      args:
+        chdir: "{{ project_dir }}"
+
+- name: Update Pandora
+  hosts: pandora
+  become: true
+  become_method: sudo
+  become_user: pandora
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+  tasks:
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/pandora"
+
+    - name: Update Pandora
+      ansible.builtin.command: "poetry run update --yes"
+      args:
+        chdir: "{{ project_dir }}"

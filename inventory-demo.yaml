@@ -1,0 +1,10 @@
+all:
+  hosts:
+    lacus:
+      ansible_host: lacus-demo.yoyodyne-it.eu
+    lookyloo:
+      ansible_host: lookyloo-demo.yoyodyne-it.eu
+    monitoring:
+      ansible_host: monitoring-demo.yoyodyne-it.eu
+    pandora:
+      ansible_host: pandora-demo.yoyodyne-it.eu

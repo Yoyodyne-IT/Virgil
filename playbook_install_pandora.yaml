@@ -1,0 +1,184 @@
+- name: Check reachable
+  hosts: all
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
+
+- name: Install system dependencies
+  hosts: pandora
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Add Libreoffice PPA
+      ansible.builtin.apt_repository:
+        repo: ppa:libreoffice/ppa
+
+    - name: Install general dependencies
+      ansible.builtin.apt:
+        pkg:
+          - build-essential
+          - git
+          - python3-venv
+          - python3-dev
+          - pipx
+          - acl
+          # HTML -> PDF
+          - libpango-1.0-0
+          - libharfbuzz0b
+          - libpangoft2-1.0-0
+          # yara-python
+          - libssl-dev
+          # reportlab
+          - libcairo2-dev
+          # textract
+          - libxml2-dev
+          - libxslt1-dev
+          - antiword
+          - unrtf
+          - poppler-utils
+          - tesseract-ocr
+          - flac
+          - ffmpeg
+          - lame
+          - libmad0
+          - libsox-fmt-mp3
+          - sox
+          - libjpeg-dev
+          - swig
+          # Other
+          - exiftool
+          - unrar
+          - libreoffice-nogui
+
+- name: Install kvrocks from deb
+  hosts: pandora
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Download kvrocks deb
+      ansible.builtin.get_url:
+        url: https://github.com/RocksLabs/kvrocks-fpm/releases/download/202502091/kvrocks_2.11.1-1_amd64.deb
+        dest: /tmp/kvrocks_2.11.1-1_amd64.deb
+
+    - name: Install kvrocks
+      ansible.builtin.apt:
+        deb: /tmp/kvrocks_2.11.1-1_amd64.deb
+
+- name: Create Users
+  hosts: pandora
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Create a user 'pandora' with a home directory
+      ansible.builtin.user:
+        name: pandora
+        create_home: true
+        shell: /bin/bash
+
+    - name: Make sure the PATH is properly set
+      become_user: pandora
+      ansible.builtin.command: pipx ensurepath
+
+- name: Initialize Nginx
+  hosts: pandora
+  become: true
+  become_method: sudo
+  vars:
+    gunicorn_port: 6100
+
+  tasks:
+
+    - name: Copy Nginx configuration
+      ansible.builtin.template:
+        src: templates/nginx_proxy.j2
+        dest: "/etc/nginx/conf.d/{{ hostvars[inventory_hostname].ansible_host }}.conf"
+
+    - name : Restart Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+
+    - name: Install certbot
+      community.general.snap:
+        name: certbot
+        classic: true
+
+    - name: Set certificate
+      ansible.builtin.command:
+        argv:
+          - certbot
+          - --nginx
+          - --non-interactive
+          - --agree-tos
+          - --email=pandora@{{ hostvars[inventory_hostname].ansible_host }}
+          - --domain={{ hostvars[inventory_hostname].ansible_host }}
+
+- name: Install Pandora
+  hosts: pandora
+  become: true
+  become_method: sudo
+  become_user: pandora
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+    gunicorn_port: 6100
+  tasks:
+
+    - name: Install poetry
+      community.general.pipx:
+        name: poetry
+
+    - name: Install poetry shell
+      ansible.builtin.command: pipx inject poetry poetry-plugin-shell
+
+    - name: Upgrade poetry
+      community.general.pipx:
+        name: poetry
+        state: upgrade
+        include_injected: true
+
+    - name: Clone Valkey
+      ansible.builtin.git:
+        repo: https://github.com/valkey-io/valkey.git
+        dest: "{{ ansible_env.HOME }}/valkey"
+        version: 8.0
+
+    - name: Build Valkey
+      ansible.builtin.command: make -j2
+      args:
+        chdir: "{{ ansible_env.HOME }}/valkey"
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/pandora"
+
+    - name: Clone pandora
+      ansible.builtin.git:
+        repo: https://github.com/pandora-analysis/pandora.git
+        dest: "{{ project_dir }}"
+
+    - name: Install Pandora
+      ansible.builtin.command: "poetry install"
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Init .env file
+      ansible.builtin.copy:
+        content: "PANDORA_HOME='{{ project_dir }}'"
+        dest: "{{ project_dir }}/.env"
+
+    - name: Initialize Pandora
+      ansible.builtin.command: "poetry run update --init"
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Copy config file
+      ansible.builtin.template:
+        src: templates/pandora_generic.json.j2
+        dest: "{{ project_dir }}/config/generic.json"
+
+    - name: Copy logging file
+      ansible.builtin.copy:
+        src: ./files/logging.json
+        dest: "{{ project_dir }}/config/logging.json"

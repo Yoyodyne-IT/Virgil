@@ -1,0 +1,84 @@
+{
+  "archive": 150,
+  "async_capture_processes": 5,
+  "auto_trigger_modules": false,
+  "default_public": true,
+  "index_is_capture": true,
+  "email": {
+    "confirm_message": "I definitely agree.",
+    "domain": "{{ hostvars[inventory_hostname].ansible_host }}",
+    "from": "Lookyloo <lookyloo@lookyloo.eu>",
+    "smtp_host": "mail.lookyloo.eu",
+    "smtp_port": "587",
+    "subject": "Capture from Lookyloo to review",
+    "to": "Investigation Team <raphael@lookyloo.eu>",
+    "defang_urls": false,
+    "deduplicate": {
+        "uuid": false,
+        "hostnames": true,
+        "interval_in_sec": 86400
+    }
+  },
+  "email_smtp_auth": {
+    "auth": false,
+    "smtp_user": null,
+    "smtp_pass": null,
+    "smtp_use_starttls": true,
+    "verify_certificate": false
+  },
+  "global_proxy": {
+    "enable": false,
+    "server": "socks5://127.0.0.1:9050",
+    "username": "",
+    "password": ""
+  },
+  "enable_bookmark": false,
+  "enable_categorization": true,
+  "enable_context_by_users": true,
+  "enable_default_blur_screenshot": true,
+  "enable_mail_notification": true,
+  "enable_takedown_form": true,
+  "ignore_sri": false,
+  "hide_captures_with_error": true,
+  "loglevel": "INFO",
+  "max_capture_time": 3600,
+  "max_tree_create_time": 120,
+  "only_global_lookups": false,
+  "priority": {
+    "sources": {
+      "api": 0,
+      "web": 10
+    },
+    "users": {
+      "_default_anon": 0,
+      "_default_auth": 5,
+      "admin": 10
+    }
+  },
+  "public_domain": "https://{{ hostvars[inventory_hostname].ansible_host }}",
+  "public_instance": false,
+  "remote_lacus": {
+    "enable": true,
+    "url": "https://{{ hostvars['lacus'].ansible_host }}"
+  },
+  "monitoring": {
+    "enable": true,
+    "url": "https://{{ hostvars['monitoring'].ansible_host }}"
+  },
+  "show_project_page": true,
+  "systemd_service_name": "lookyloo",
+  "time_delta_on_index": {
+    "days": 7,
+    "hours": 0,
+    "weeks": 0
+  },
+  "tor_proxy": {
+    "server": "socks5://127.0.0.1:9050"
+  },
+  "use_user_agents_users": false,
+  "users": {},
+  "website_listen_ip": "127.0.0.1",
+  "website_listen_port": {{ gunicorn_port }},
+  "index_everything": true,
+  "allow_headed": true
+}
