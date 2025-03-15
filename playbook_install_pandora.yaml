@@ -112,6 +112,7 @@
           - --agree-tos
           - --email=pandora@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
+      creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Pandora
   hosts: pandora

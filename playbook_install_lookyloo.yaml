@@ -93,6 +93,7 @@
           - --agree-tos
           - --email=lookyloo@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
+        creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Lookyloo
   hosts: lookyloo
@@ -153,20 +154,23 @@
       args:
         chdir: "{{ project_dir }}"
 
+    - name: Copy logging file
+      ansible.builtin.copy:
+        src: ./files/logging.json
+        dest: "{{ project_dir }}/config/logging.json"
+
     - name: Copy config file
       ansible.builtin.template:
         src: ./templates/lookyloo_generic.json.j2
         dest: "{{ project_dir }}/config/generic.json"
 
+    - name: Load API keys
+      ansible.builtin.include_vars: vars/api_keys.yml
+
     - name: Copy config modules file
       ansible.builtin.template:
         src: ./templates/lookyloo_modules.json.j2
         dest: "{{ project_dir }}/config/modules.json"
-
-    - name: Copy logging file
-      ansible.builtin.copy:
-        src: ./files/logging.json
-        dest: "{{ project_dir }}/config/logging.json"
 
 - name: Initialize Nginx Monitoring
   hosts: monitoring
@@ -201,6 +205,7 @@
           - --agree-tos
           - --email=monitoring@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
+        creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Lookyloo Monitoring
   hosts: monitoring

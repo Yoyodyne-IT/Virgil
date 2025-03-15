@@ -1,6 +1,6 @@
 {
   "VirusTotal": {
-    "apikey": null,
+    "apikey": "{{ virustotal | default(None) }}",
     "trustenv": false,
     "autosubmit": false,
     "allow_auto_trigger": false,
@@ -66,7 +66,7 @@
     "admin_only": false
   },
   "UrlScan": {
-    "apikey": null,
+    "apikey": "{{ urlscan | default(None) }}",
     "autosubmit": false,
     "allow_auto_trigger": false,
     "force_visibility": false,
@@ -83,7 +83,7 @@
     "url": "https://urlhaus-api.abuse.ch/v1/",
     "allow_auto_trigger": true,
     "admin_only": false,
-    "apikey": null
+    "apikey": "{{ urlhaus | default(None)}}"
   },
   "Hashlookup": {
     "enabled": false,
@@ -92,8 +92,8 @@
     "admin_only": false
   },
   "CIRCLPDNS": {
-    "user": null,
-    "password": null,
+    "user": "{{ circl_pdns.user | default(None) }}",
+    "password": "{{ circl_pdns.password | default(None) }}",
     "allow_auto_trigger": true,
     "admin_only": false
   },
