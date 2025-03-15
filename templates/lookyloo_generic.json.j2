@@ -1,62 +1,30 @@
 {
-  "archive": 150,
-  "async_capture_processes": 5,
-  "auto_trigger_modules": false,
-  "default_public": true,
-  "index_is_capture": true,
-  "email": {
-    "confirm_message": "I definitely agree.",
-    "domain": "{{ hostvars[inventory_hostname].ansible_host }}",
-    "from": "Lookyloo <lookyloo@lookyloo.eu>",
-    "smtp_host": "mail.lookyloo.eu",
-    "smtp_port": "587",
-    "subject": "Capture from Lookyloo to review",
-    "to": "Investigation Team <raphael@lookyloo.eu>",
-    "defang_urls": false,
-    "deduplicate": {
-        "uuid": false,
-        "hostnames": true,
-        "interval_in_sec": 86400
-    }
-  },
-  "email_smtp_auth": {
-    "auth": false,
-    "smtp_user": null,
-    "smtp_pass": null,
-    "smtp_use_starttls": true,
-    "verify_certificate": false
-  },
-  "global_proxy": {
-    "enable": false,
-    "server": "socks5://127.0.0.1:9050",
-    "username": "",
-    "password": ""
-  },
-  "enable_bookmark": false,
-  "enable_categorization": true,
-  "enable_context_by_users": true,
-  "enable_default_blur_screenshot": true,
-  "enable_mail_notification": true,
-  "enable_takedown_form": true,
-  "ignore_sri": false,
-  "hide_captures_with_error": true,
   "loglevel": "INFO",
-  "max_capture_time": 3600,
-  "max_tree_create_time": 120,
-  "only_global_lookups": false,
-  "priority": {
-    "sources": {
-      "api": 0,
-      "web": 10
-    },
-    "users": {
-      "_default_anon": 0,
-      "_default_auth": 5,
-      "admin": 10
-    }
+  "only_global_lookups": true,
+  "public_instance": true,
+  "public_domain": "{{ hostvars[inventory_hostname].ansible_host }}",
+  "website_listen_ip": "0.0.0.0",
+  "website_listen_port": {{ gunicorn_port }},
+  "systemd_service_name": "lookyloo",
+  "default_public": true,
+  "index_is_capture": false,
+  "users": {},
+  "time_delta_on_index": {
+    "weeks": 1,
+    "days": 0,
+    "hours": 0
   },
-  "public_domain": "https://{{ hostvars[inventory_hostname].ansible_host }}",
-  "public_instance": false,
+  "ignore_sri": false,
+  "async_capture_processes": 1,
+  "use_user_agents_users": false,
+  "enable_default_blur_screenshot": false,
+  "show_project_page": true,
+  "enable_context_by_users": false,
+  "enable_categorization": false,
+  "enable_bookmark": false,
+  "enable_takedown_form": false,
+  "auto_trigger_modules": false,
+  "enable_mail_notification": false,
   "remote_lacus": {
     "enable": true,
     "url": "https://{{ hostvars['lacus'].ansible_host }}"
@@ -65,20 +33,98 @@
     "enable": true,
     "url": "https://{{ hostvars['monitoring'].ansible_host }}"
   },
-  "show_project_page": true,
-  "systemd_service_name": "lookyloo",
-  "time_delta_on_index": {
-    "days": 7,
-    "hours": 0,
-    "weeks": 0
-  },
   "tor_proxy": {
     "server": "socks5://127.0.0.1:9050"
   },
-  "use_user_agents_users": false,
-  "users": {},
-  "website_listen_ip": "127.0.0.1",
-  "website_listen_port": {{ gunicorn_port }},
-  "index_everything": true,
-  "allow_headed": true
+  "global_proxy": {
+    "enable": false,
+    "server": "",
+    "username": "",
+    "password": ""
+  },
+  "email": {
+    "from": "Lookyloo <lookyloo@myorg.local>",
+    "to": "Investigation Team <investigation_unit@myorg.local>",
+    "subject": "Capture from Lookyloo to review",
+    "smtp_host": "localhost",
+    "smtp_port": "25",
+    "confirm_message": "Message the users need to confirm before they submit a notification.",
+    "defang_urls": true,
+    "deduplicate": {
+        "uuid": true,
+        "hostnames": false,
+        "interval_in_sec": 86400
+    }
+  },
+  "email_smtp_auth": {
+      "auth": false,
+      "smtp_user":"johndoe@myorg.local",
+      "smtp_pass":"password",
+      "smtp_use_starttls": true,
+      "verify_certificate": true
+  },
+  "priority": {
+    "sources": {
+      "web": 10,
+      "api": 0
+    },
+    "users": {
+      "_default_auth": 5,
+      "_default_anon": 0,
+      "admin": 10
+    }
+  },
+  "hide_captures_with_error": false,
+  "archive": 180,
+  "max_capture_time": 3600,
+  "max_tree_create_time": 120,
+  "s3fs": {
+    "archive_on_s3fs": false,
+    "config": {
+      "key": "",
+      "secret": "",
+      "endpoint_url": "",
+      "bucket_name": ""
+    }
+  },
+  "index_everything": false,
+  "allow_headed": false,
+  "_notes": {
+    "loglevel": "(lookyloo) Can be one of the value listed here: https://docs.python.org/3/library/logging.html#levels",
+    "only_global_lookups": "Set it to True if your instance is publicly available so users aren't able to scan your internal network",
+    "public_instance": "true means disabling features deemed unsafe on a public instance (such as indexing private captures)",
+    "public_domain": "Domain where the instance can be reached. Used for permalinks (e-mail, MISP export).",
+    "website_listen_ip": "IP Flask will listen on. Defaults to 0.0.0.0, meaning all interfaces.",
+    "website_listen_port": "Port Flask will listen on.",
+    "systemd_service_name": "(Optional) Name of the systemd service if your project has one.",
+    "default_public": "If true, the capture is public and will be visible on the index page by default (can be unticked on the capture page).",
+    "index_is_capture": "If true, the capture page is the default landing page (faster for big instances).",
+    "users": "It is some kind of an admin accounts. Format: {username: password}",
+    "time_delta_on_index": "Time interval of the capture displayed on the index",
+    "async_capture_processes": "Number of async_capture processes to start. This should not be higher than the number of splash instances you have running. A very high number will use *a lot* of ram.",
+    "use_user_agents_users": "Only usable for medium/high use instances: use the user agents of the users of the platform",
+    "enable_default_blur_screenshot": "If true, blur the screenshot by default (useful on public instances)",
+    "show_project_page": "If true, display a ribbon with a link to the githug projects page at the top right side of the screen",
+    "enable_context_by_users": "Allow the users to add context to a response body",
+    "enable_categorization": "Allow the users to add contextualization to a capture",
+    "enable_bookmark": "Allow to bookmark nodes on tree",
+    "auto_trigger_modules": "Automatically trigger the modules when the tree is loaded and when the capture is cached",
+    "enable_mail_notification": "Allow users to notify a pre-configured email address about a specific capture",
+    "remote_lacus": "By default, lookyloo will do the capture locally. Enabling this feature means you have a dedicated Lacus instance somewhere",
+    "monitoring": "Enable connection to a remote monitoring instance",
+    "tor_proxy": "URL to connect to a SOCKS 5 proxy for tor - If you capture via a lacus instance, this value is ignored",
+    "global_proxy": "Proxy configuration to use for *all* the requests (except .onions) - If you capture via a lacus instance, this value is ignored",
+    "email": "Configuration for sending email notifications.",
+    "email_smtp_auth": "Email SMTP auth configuration",
+    "priority": "Define the priority of a new capture. A capture from the web interface has priority over a capture from the API, same for authenticated user vs. anonymous.",
+    "hide_captures_with_error": "Capturing an URL may result in an error (domain non-existent, HTTP error, ...). They may be useful to see, but if you have a public instance, they will clutter the index.",
+    "archive": "The captures older than this value (in days) will be archived. They're not cached by default in the Lookyloo class.",
+    "max_capture_time": "The very maximal time we allow a capture to keep going. Should only be triggered by captures that cause playwright to never quit.",
+    "max_tree_create_time": "The max time the generation of a tree is allowed to take",
+    "s3fs": "The config to access a S3FS instance with the s3fs python module - it is not integrated properly for now as it requires urllib < 2.0 which is a non-started at this stage.",
+    "index_everything": "If true, index every capture, even if it's not public. This feature requires a dedicated kvrocks instance, and is only accessible when logged-in as admin.",
+    "ignore_sri": "If true, the sri values are ignored and not calculated so that there are no problems while developing and testing.",
+    "enable_takedown_form": "If true, a form for simplified takedown will be enabled.",
+    "allow_headed": "Allow users to use the headed version of the browser. It requires a graphical environment."
+  }
 }
