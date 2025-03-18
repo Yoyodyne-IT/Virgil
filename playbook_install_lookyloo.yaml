@@ -93,7 +93,6 @@
           - --agree-tos
           - --email=lookyloo@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
-        creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Lookyloo
   hosts: lookyloo
@@ -205,7 +204,6 @@
           - --agree-tos
           - --email=monitoring@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
-        creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Lookyloo Monitoring
   hosts: monitoring

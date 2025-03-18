@@ -49,6 +49,8 @@
           - exiftool
           - unrar
           - libreoffice-nogui
+          # Clamav
+          - clamav-daemon
 
 - name: Install kvrocks from deb
   hosts: pandora
@@ -63,6 +65,24 @@
     - name: Install kvrocks
       ansible.builtin.apt:
         deb: /tmp/kvrocks_2.11.1-1_amd64.deb
+
+- name: Prepare clamav
+  hosts: pandora
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Stop freshclam
+      ansible.builtin.systemd:
+        name: clamav-freshclam
+        state: stopped
+
+    - name: Update clamav
+      ansible.builtin.command: sudo freshclam
+
+    - name: Start freshclam
+      ansible.builtin.systemd:
+        name: clamav-freshclam
+        state: started
 
 - name: Create Users
   hosts: pandora
@@ -112,7 +132,6 @@
           - --agree-tos
           - --email=pandora@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
-      creates: "/etc/letsencrypt/live/{{ hostvars[inventory_hostname].ansible_host }}/fullchain.pem"
 
 - name: Install Pandora
   hosts: pandora
@@ -158,6 +177,7 @@
       ansible.builtin.git:
         repo: https://github.com/pandora-analysis/pandora.git
         dest: "{{ project_dir }}"
+        force: true
 
     - name: Install Pandora
       ansible.builtin.command: "poetry install"
@@ -183,3 +203,13 @@
       ansible.builtin.copy:
         src: ./files/logging.json
         dest: "{{ project_dir }}/config/logging.json"
+
+    - name: Load API keys
+      ansible.builtin.include_vars: vars/api_keys.yml
+
+    - name: Copy workers config files
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ project_dir }}/pandora/workers/{{ item | basename }}"
+      with_fileglob:
+        - "templates/pandora_workers/*.yml"

@@ -59,7 +59,7 @@
       ansible.builtin.set_fact:
         project_dir: "{{ ansible_env.HOME }}/monitoring"
 
-    - name: Update Lookyloo
+    - name: Update Lookyloo Monitoring
       ansible.builtin.command: "poetry run update --yes"
       args:
         chdir: "{{ project_dir }}"

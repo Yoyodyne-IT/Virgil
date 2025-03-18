@@ -1,6 +1,10 @@
 virustotal: null
 urlscan: null
 urlhaus: null
+hybridanalysis: null
+joesandbox: null
+malwarebazaar: null
+mwdb: null
 
 circl_pdns:
   user: null
