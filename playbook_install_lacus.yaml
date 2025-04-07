@@ -79,9 +79,9 @@
         create_home: true
         shell: /bin/bash
 
-   - name: Make sure the PATH is properly set
-     become_user: lookyloo
-     ansible.builtin.command: pipx ensurepath
+    - name: Make sure the PATH is properly set
+      become_user: lookyloo
+      ansible.builtin.command: pipx ensurepath
 
 - name: Install Lacus
   hosts: lacus
