@@ -1,5 +1,8 @@
 # Virgil
-Lookyloo, Lacus, and Pandora deployment playbooks
+
+Virgil is a collection of playbooks to guide you through the [circles of Hell](https://en.wikipedia.org/wiki/Inferno_(Dante)).
+
+They are meant to deploy Lookyloo, Lacus, and Pandora.
 
 # Requirements
 
@@ -35,3 +38,5 @@ ansible-playbook -i inventory.yaml -u ansible playbook_install_pandora.yaml
 ```bash
 ansible-playbook -i inventory.yaml -u ansible playbook_update.yaml
 ```
+
+
