@@ -1,0 +1,7 @@
+meta:
+  name: Observables
+  description: Extracts observables from the uploaded file.
+  replicas: 5
+
+settings:
+  timeout: 3m

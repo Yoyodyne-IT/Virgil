@@ -1,0 +1,13 @@
+meta:
+  name: Lookyloo
+  description: Lookyloo is a web interface allowing to scrape a website and then displays a tree of domains calling each other.
+
+settings:
+  apiurl: "https://{{ hostvars['lookyloo'].ansible_host }}"
+  autosubmit: false
+  public_listing: false
+  referer: null
+  user_agent: null
+  http_headers: {}
+  cookies: {}
+  proxy: null
