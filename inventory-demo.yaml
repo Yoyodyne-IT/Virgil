@@ -2,6 +2,11 @@ all:
   hosts:
     lacus:
       ansible_host: lacus-demo.yoyodyne-it.eu
+      # Optional setting to enable wireproxy vpns on this instance
+      # You need to have a config file in the wireproxy directory, and the file name being <Name>.conf
+      wireproxy:
+        - US
+        - CA
     lookyloo:
       ansible_host: lookyloo-demo.yoyodyne-it.eu
     monitoring:

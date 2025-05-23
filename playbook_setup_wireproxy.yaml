@@ -1,0 +1,34 @@
+- name: Check reachable
+  hosts: lacus
+  tasks:
+    - name: Check if host is reachable
+      ansible.builtin.ping:
+
+- name: Install golang
+  hosts: lacus
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Add golang ppa to have latest version
+      ansible.builtin.apt_repository:
+        repo: ppa:longsleep/golang-backports
+        state: present
+
+    - name: Install go
+      ansible.builtin.apt:
+        pkg:
+          - golang-go
+
+- name: Install wireproxy for Lacus user
+  hosts: lacus
+  become: true
+  become_method: sudo
+  become_user: lacus
+  tasks:
+    - name: Build and install wireproxy
+      ansible.builtin.command:
+        argv:
+          - go
+          - install
+          - github.com/pufferffish/wireproxy/cmd/wireproxy@latest
+        creates: "{{ ansible_env.HOME }}/go/bin/wireproxy"

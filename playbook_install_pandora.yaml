@@ -144,6 +144,8 @@
     allow_world_readable_tmpfiles: true
     gunicorn_port: 6100
   tasks:
+    - name: Reinstall all
+      ansible.builtin.command: pipx reinstall-all
 
     - name: Install poetry
       community.general.pipx:
@@ -162,7 +164,12 @@
       ansible.builtin.git:
         repo: https://github.com/valkey-io/valkey.git
         dest: "{{ ansible_env.HOME }}/valkey"
-        version: 8.0
+        version: 8.1
+
+    - name: Distclean valkey
+      ansible.builtin.command: make distclean
+      args:
+        chdir: "{{ ansible_env.HOME }}/valkey"
 
     - name: Build Valkey
       ansible.builtin.command: make -j2

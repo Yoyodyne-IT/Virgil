@@ -18,6 +18,7 @@
         "password": ""
     },
     "allow_headed": false,
+    "wireproxy_path": "{{ ansible_env.HOME }}/go/bin/wireproxy",
     "_notes": {
         "loglevel": "Can be one of the value listed here: https://docs.python.org/3/library/logging.html#levels",
         "website_listen_ip": "IP Flask will listen on. Defaults to 0.0.0.0, meaning all interfaces.",
@@ -26,8 +27,11 @@
         "concurrent_captures": "How many captures can happen at the same (expect ~2Gb of ram/capture)",
         "only_global_lookups": "Set it to True if your instance is publicly available so users aren't able to scan your internal network",
         "max_capture_time": "The very maximal time we allow a capture to keep going. Should only be triggered by captures that cause playwright to never quit, or captures with way too many children.",
+        "expire_results": "The capture results are stored in redis. The time after which they're expired (in seconds). Set it to a lower value (but not too low) if you have a lot of captures and not a lot of memory",
         "max_retries": "The very maximal amount of times lacus will retry a failing capture.",
         "tor_proxy": "URL to connect to a SOCKS 5 proxy for tor",
-        "global_proxy": "Proxy configuration to use for *all* the requests (except .onions)"
+        "global_proxy": "Proxy configuration to use for *all* the requests (except .onions)",
+        "allow_headed": "Allow users to use the headed version of the browser. It requires a graphical environment.",
+        "wireproxy_path": "Path to the wireproxy binary. Useful if you have wireguard VPNs to expose to lacus. Get it from there: https://github.com/whyvl/wireproxy/"
     }
 }

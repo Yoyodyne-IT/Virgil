@@ -6,6 +6,7 @@ They are meant to deploy Lookyloo, Lacus, and Pandora.
 
 # Requirements
 
+* A machine running at least Ubuntu 24.04
 * `ansible` user on the target machine(s), passwordless sudo
 
 To make the `ansible` user passwordless sudo, create `/etc/sudoers.d/91-ansible-users`, and insert the following line:

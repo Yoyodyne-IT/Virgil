@@ -27,6 +27,9 @@
     - name: Update PATH for pipx / poetry
       ansible.builtin.command: pipx ensurepath
 
+    - name: Reinstall all
+      ansible.builtin.command: pipx reinstall-all
+
     - name: Install Playwright
       community.general.pipx:
         name: playwright
@@ -67,6 +70,10 @@
           - --agree-tos
           - --email=lacus@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
+
+- name: Optionally setup Wireproxy
+  ansible.builtin.import_playbook: playbook_setup_wireproxy.yaml
+  when: wireproxy is defined
 
 - name: Create Users
   hosts: lacus
@@ -112,7 +119,7 @@
       ansible.builtin.git:
         repo: https://github.com/valkey-io/valkey.git
         dest: "{{ ansible_env.HOME }}/valkey"
-        version: 8.0
+        version: 8.1
 
     - name: Build Valkey
       ansible.builtin.command: make -j2
@@ -152,3 +159,10 @@
       ansible.builtin.copy:
         src: ./files/logging.json
         dest: "{{ project_dir }}/config/logging.json"
+
+    - name: Copy wireguard config files
+      ansible.builtin.copy:
+        src: "./wireproxy/{{ item }}.conf"
+        dest: "{{ project_dir }}/config/{{ item }}.conf"
+      loop: "{{ wireproxy }}"
+      when: wireproxy is defined
