@@ -45,6 +45,15 @@
     gunicorn_port: 7100
 
   tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        pkg:
+          - nginx
+
+    - name: Create ngnix config directory
+      ansible.builtin.file:
+        path: /etc/nginx/conf.d
+        state: directory
 
     - name: Copy Nginx configuration
       ansible.builtin.template:
@@ -71,10 +80,6 @@
           - --email=lacus@{{ hostvars[inventory_hostname].ansible_host }}
           - --domain={{ hostvars[inventory_hostname].ansible_host }}
 
-- name: Optionally setup Wireproxy
-  ansible.builtin.import_playbook: playbook_setup_wireproxy.yaml
-  when: wireproxy is defined
-
 - name: Create Users
   hosts: lacus
   become: true
@@ -87,8 +92,12 @@
         shell: /bin/bash
 
     - name: Make sure the PATH is properly set
-      become_user: lookyloo
+      become_user: lacus
       ansible.builtin.command: pipx ensurepath
+
+- name: Optionally setup Wireproxy
+  ansible.builtin.import_playbook: playbook_setup_wireproxy.yaml
+  when: wireproxy is defined
 
 - name: Install Lacus
   hosts: lacus

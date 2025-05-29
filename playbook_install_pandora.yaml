@@ -108,6 +108,11 @@
 
   tasks:
 
+    - name: Create ngnix config directory
+      ansible.builtin.file:
+        path: /etc/nginx/conf.d
+        state: directory
+
     - name: Copy Nginx configuration
       ansible.builtin.template:
         src: templates/nginx_proxy.j2
