@@ -9,9 +9,6 @@
   become: true
   become_method: sudo
   tasks:
-    # - name: Add Libreoffice PPA
-    #  ansible.builtin.apt_repository:
-    #    repo: ppa:libreoffice/ppa
 
     - name: Install general dependencies
       ansible.builtin.apt:
