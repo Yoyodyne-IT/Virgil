@@ -68,6 +68,10 @@
     gunicorn_port: 5100
 
   tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        pkg:
+          - nginx
 
     - name: Create ngnix config directory
       ansible.builtin.file:

@@ -9,9 +9,9 @@
   become: true
   become_method: sudo
   tasks:
-    - name: Add Libreoffice PPA
-      ansible.builtin.apt_repository:
-        repo: ppa:libreoffice/ppa
+    # - name: Add Libreoffice PPA
+    #  ansible.builtin.apt_repository:
+    #    repo: ppa:libreoffice/ppa
 
     - name: Install general dependencies
       ansible.builtin.apt:
@@ -107,6 +107,11 @@
     gunicorn_port: 6100
 
   tasks:
+
+    - name: Install Nginx
+      ansible.builtin.apt:
+        pkg:
+          - nginx
 
     - name: Create ngnix config directory
       ansible.builtin.file:

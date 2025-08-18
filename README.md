@@ -9,11 +9,17 @@ They are meant to deploy Lookyloo, Lacus, and Pandora.
 * A machine running at least Ubuntu 24.04
 * `ansible` user on the target machine(s), passwordless sudo
 
+```bash
+adduser ansible
+```
+
 To make the `ansible` user passwordless sudo, create `/etc/sudoers.d/91-ansible-users`, and insert the following line:
 
 ```bash
 ansible ALL=(ALL) NOPASSWD:ALL
 ```
+
+* Add an ssh key in `.ssh/authorized_keys`
 
 * DNS records pointing to the target machine(s) for `lacus`, `lookyloo`, `monitoring, `and `pandora`
 

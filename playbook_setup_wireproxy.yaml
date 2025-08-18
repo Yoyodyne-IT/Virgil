@@ -9,10 +9,9 @@
   become: true
   become_method: sudo
   tasks:
-    - name: Add golang ppa to have latest version
-      ansible.builtin.apt_repository:
-        repo: ppa:longsleep/golang-backports
-        state: present
+    #- name: Add golang ppa to have latest version
+    #  ansible.builtin.apt_repository:
+    #     repo: ppa:longsleep/golang-backports
 
     - name: Install go
       ansible.builtin.apt:
