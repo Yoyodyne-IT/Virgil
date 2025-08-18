@@ -1,0 +1,344 @@
+- name: Check reachable
+  hosts: all
+  tasks:
+   - name: Ping my hosts
+     ansible.builtin.ping:
+
+- name: Install system dependencies
+  hosts: ail
+  become: true
+  become_method: sudo
+  tasks:
+    # - name: Add Libreoffice PPA
+    #  ansible.builtin.apt_repository:
+    #    repo: ppa:libreoffice/ppa
+
+    - name: Install general dependencies
+      ansible.builtin.apt:
+        pkg:
+          # base
+          - build-essential
+          - git
+          - python3-venv
+          - python3-dev
+          - pipx
+          - acl
+          - cmake
+          - automake
+          - libtool
+          - pkg-config
+          # base AIL
+          - virtualenv
+          - python3-tk
+          - libfreetype6-dev
+          - unzip
+          - libsnappy-dev
+          - wget
+          # bloom filters
+          - libssl-dev
+          - libfreetype6-dev
+          - python3-numpy
+          # pycld3
+          - protobuf-compiler
+          - libprotobuf-dev
+          # qrcode
+          - python3-opencv
+          - libzbar0
+          # dns
+          - libadns1
+          - libadns1-dev
+          # generate-data-flow graph
+          - graphviz
+          # ssdeep
+          - libfuzzy-dev
+          - libffi-dev
+          - autoconf
+          # sflock
+          - p7zip-full
+
+
+- name: Install kvrocks from deb
+  hosts: ail
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Download kvrocks deb
+      ansible.builtin.get_url:
+        url: https://github.com/RocksLabs/kvrocks-fpm/releases/download/202502091/kvrocks_2.11.1-1_amd64.deb
+        dest: /tmp/kvrocks_2.11.1-1_amd64.deb
+
+    - name: Install kvrocks
+      ansible.builtin.apt:
+        deb: /tmp/kvrocks_2.11.1-1_amd64.deb
+
+- name: Install tlsh, pgpdump and yara as root
+  hosts: ail
+  become: true
+  become_method: sudo
+  vars:
+    yara_version: 4.3.0
+  tasks:
+    - name: Clone TLSH
+      ansible.builtin.git:
+        repo: https://github.com/trendmicro/tlsh.git
+        dest: "{{ ansible_env.HOME }}/tlsh"
+
+    - name: Build TLSH
+      ansible.builtin.command: ./make.sh
+      args:
+        chdir: "{{ ansible_env.HOME }}/tlsh"
+
+    - name: System install for TLSH
+      ansible.builtin.command: make install
+      args:
+        chdir: "{{ ansible_env.HOME }}/tlsh/build/release/"
+
+    - name: Clone pgpdump
+      ansible.builtin.git:
+        repo: https://github.com/kazu-yamamoto/pgpdump.git
+        dest: "{{ ansible_env.HOME }}/pgpdump"
+
+    - name: Build pgpdump
+      shell: |
+        autoreconf -fiW all
+        ./configure
+        make
+      args:
+        chdir: "{{ ansible_env.HOME }}/pgpdump"
+
+    - name: System install for pgpdump
+      ansible.builtin.command: make install
+      args:
+        chdir: "{{ ansible_env.HOME }}/pgpdump"
+
+    - name: Download yara
+      ansible.builtin.get_url:
+        url: "https://github.com/VirusTotal/yara/archive/v{{yara_version}}.zip"
+        dest: "{{ ansible_env.HOME }}/yara_v{{yara_version}}.zip"
+
+    - name: Unzip Yara
+      ansible.builtin.unarchive:
+        src: "{{ ansible_env.HOME }}/yara_v{{yara_version}}.zip"
+        dest: "{{ ansible_env.HOME }}"
+        remote_src: yes
+
+    - name: Build Yara
+      shell: |
+        ./bootstrap.sh
+        ./configure
+        make
+      args:
+        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+
+    - name: System install for Yara
+      ansible.builtin.command: make install
+      args:
+        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+
+    - name: Check Yara
+      ansible.builtin.command: make check
+      args:
+        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+
+    - name: Run ldconfig
+      ansible.builtin.command: ldconfig
+
+- name: Create Users
+  hosts: ail
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Create a user 'ail' with a home directory
+      ansible.builtin.user:
+        name: ail
+        create_home: true
+        shell: /bin/bash
+
+    - name: Make sure the PATH is properly set
+      become_user: ail
+      ansible.builtin.command: pipx ensurepath
+
+- name: Initialize Nginx
+  hosts: ail
+  become: true
+  become_method: sudo
+  vars:
+    gunicorn_port: 7000
+
+  tasks:
+
+    - name: Install Nginx
+      ansible.builtin.apt:
+        pkg:
+          - nginx
+
+    - name: Create ngnix config directory
+      ansible.builtin.file:
+        path: /etc/nginx/conf.d
+        state: directory
+
+    - name: Copy Nginx configuration
+      ansible.builtin.template:
+        src: templates/nginx_proxy.j2
+        dest: "/etc/nginx/conf.d/{{ hostvars[inventory_hostname].ansible_host }}.conf"
+
+    - name : Restart Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+
+    - name: Install certbot
+      community.general.snap:
+        name: certbot
+        classic: true
+
+    - name: Set certificate
+      ansible.builtin.command:
+        argv:
+          - certbot
+          - --nginx
+          - --non-interactive
+          - --agree-tos
+          - --email=ail@{{ hostvars[inventory_hostname].ansible_host }}
+          - --domain={{ hostvars[inventory_hostname].ansible_host }}
+
+- name: Install ail
+  hosts: ail
+  become: true
+  become_method: sudo
+  become_user: ail
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+  vars:
+    allow_world_readable_tmpfiles: true
+    gunicorn_port: 7000
+    circl_zmq: "tcp://crf.circl.lu:5556"
+  tasks:
+    - name: Reinstall all
+      ansible.builtin.command: pipx reinstall-all
+
+    - name: Install poetry
+      community.general.pipx:
+        name: poetry
+
+    - name: Install poetry shell
+      ansible.builtin.command: pipx inject poetry poetry-plugin-shell
+
+    - name: Upgrade poetry
+      community.general.pipx:
+        name: poetry
+        state: upgrade
+        include_injected: true
+
+    - name: Set project directory
+      ansible.builtin.set_fact:
+        project_dir: "{{ ansible_env.HOME }}/ail-framework"
+
+    - name: Clone ail
+      ansible.builtin.git:
+        repo: https://github.com/ail-project/ail-framework.git
+        dest: "{{ project_dir }}"
+        force: true
+
+    # All the repos are expected to be inside {{project_dir}}
+    - name: Clone Redis
+      ansible.builtin.git:
+        repo: https://github.com/redis/redis.git
+        dest: "{{ project_dir }}/redis"
+        version: 5.0
+
+    - name: Distclean redis
+      ansible.builtin.command: make distclean
+      args:
+        chdir: "{{ project_dir }}/redis"
+
+    - name: Build Redis
+      ansible.builtin.command: make -j4
+      args:
+        chdir: "{{ project_dir }}/redis"
+
+    - name: Clone TLSH
+      ansible.builtin.git:
+        repo: https://github.com/trendmicro/tlsh.git
+        dest: "{{ project_dir }}/tlsh"
+
+    - name: Build TLSH
+      ansible.builtin.command: ./make.sh
+      args:
+        chdir: "{{ project_dir }}/tlsh"
+
+    - name: Clone pgpdump
+      ansible.builtin.git:
+        repo: https://github.com/kazu-yamamoto/pgpdump.git
+        dest: "{{ project_dir }}/pgpdump"
+
+    - name: Build pgpdump
+      shell: |
+        autoreconf -fiW all
+        ./configure
+        make
+      args:
+        chdir: "{{ project_dir }}/pgpdump"
+
+    - name: Init .env file
+      ansible.builtin.copy:
+        content: "AIL_HOME='{{ project_dir }}'"
+        dest: "{{ project_dir }}/.env"
+
+    - name: Copy core config file
+      ansible.builtin.template:
+        src: ail_files/core.cfg
+        dest: "{{ project_dir }}/configs/core.cfg"
+
+    - name: Init virtualenv
+      shell: |
+        virtualenv -p python3 AILENV
+        echo export AIL_HOME=$(pwd) >> ./AILENV/bin/activate
+        echo export AIL_BIN=$(pwd)/bin/ >> ./AILENV/bin/activate
+        echo export AIL_FLASK=$(pwd)/var/www/ >> ./AILENV/bin/activate
+        echo export AIL_REDIS=$(pwd)/redis/src/ >> ./AILENV/bin/activate
+        echo export AIL_KVROCKS=$(pwd)/kvrocks/src/ >> ./AILENV/bin/activate
+      args:
+        chdir: "{{ project_dir }}"
+        creates: "{{ project_dir }}/AILENV"
+
+    - name: Copy update_thirdparty.sh running as user
+      ansible.builtin.copy:
+        src: ail_files/update_thirdparty.sh
+        dest: "{{ project_dir }}/var/www/update_thirdparty.sh"
+        mode: u+rwx
+
+    - name: Copy LAUNCH running to use system kvrocks
+      ansible.builtin.copy:
+        src: ail_files/LAUNCH.sh
+        dest: "{{ project_dir }}/bin/LAUNCH.sh"
+        mode: u+rwx
+
+    - name: Copy import_export without thehive
+      ansible.builtin.copy:
+        src: ail_files/import_export.py
+        dest: "{{ project_dir }}/var/www/blueprints/import_export.py"
+
+    - name: Copy Flask server without selfsigned certs
+      ansible.builtin.copy:
+        src: ail_files/Flask_server.py
+        dest: "{{ project_dir }}/var/www/Flask_server.py"
+
+    - name: Install Python deps in virtualenv
+      shell: |
+        . ./AILENV/bin/activate
+        ./install_virtualenv.sh
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Create pastes dir
+      ansible.builtin.file:
+        path: "{{ project_dir }}/PASTES"
+        state: directory
+
+    - name: Init update version
+      shell: |
+        git fetch --depth=500 --tags --prune
+        git describe --abbrev=0 --tags | tr -d '\n' > {{ project_dir }}/update/current_version
+      args:
+        chdir: "{{ project_dir }}"
