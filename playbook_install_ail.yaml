@@ -334,3 +334,15 @@
         git describe --abbrev=0 --tags | tr -d '\n' > {{ project_dir }}/update/current_version
       args:
         chdir: "{{ project_dir }}"
+
+    - name: Launch kvrocks
+      ansible.builtin.command: "bash {{ project_dir }}/bin/LAUNCH.sh -lkv"
+
+    - name: Create default user
+      ansible.builtin.command: python3 create_default_user.py > user
+      args:
+        chdir: "{{ project_dir }}/var/www"
+        creates: "{{ project_dir }}/var/www/user"
+
+    - name: Kill everything
+      ansible.builtin.command: "bash {{ project_dir }}/bin/LAUNCH.sh -k"
