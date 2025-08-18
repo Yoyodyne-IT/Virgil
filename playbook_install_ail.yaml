@@ -311,11 +311,6 @@
         dest: "{{ project_dir }}/bin/LAUNCH.sh"
         mode: u+rwx
 
-    - name: Copy import_export without thehive
-      ansible.builtin.copy:
-        src: ail_files/import_export.py
-        dest: "{{ project_dir }}/var/www/blueprints/import_export.py"
-
     - name: Copy Flask server without selfsigned certs
       ansible.builtin.copy:
         src: ail_files/Flask_server.py
