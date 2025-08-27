@@ -299,23 +299,6 @@
         chdir: "{{ project_dir }}"
         creates: "{{ project_dir }}/AILENV"
 
-    - name: Copy update_thirdparty.sh running as user
-      ansible.builtin.copy:
-        src: ail_files/update_thirdparty.sh
-        dest: "{{ project_dir }}/var/www/update_thirdparty.sh"
-        mode: u+rwx
-
-    - name: Copy LAUNCH running to use system kvrocks
-      ansible.builtin.copy:
-        src: ail_files/LAUNCH.sh
-        dest: "{{ project_dir }}/bin/LAUNCH.sh"
-        mode: u+rwx
-
-    - name: Copy Flask server without selfsigned certs
-      ansible.builtin.copy:
-        src: ail_files/Flask_server.py
-        dest: "{{ project_dir }}/var/www/Flask_server.py"
-
     - name: Install Python deps in virtualenv
       shell: |
         . ./AILENV/bin/activate
