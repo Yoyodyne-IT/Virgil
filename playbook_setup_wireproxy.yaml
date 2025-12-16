@@ -30,4 +30,4 @@
           - go
           - install
           - github.com/pufferffish/wireproxy/cmd/wireproxy@latest
-        creates: "{{ ansible_env.HOME }}/go/bin/wireproxy"
+        creates: "{{ ansible_facts['env']['HOME'] }}/go/bin/wireproxy"

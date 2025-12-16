@@ -78,22 +78,22 @@
     - name: Clone TLSH
       ansible.builtin.git:
         repo: https://github.com/trendmicro/tlsh.git
-        dest: "{{ ansible_env.HOME }}/tlsh"
+        dest: "{{ ansible_facts['env']['HOME'] }}/tlsh"
 
     - name: Build TLSH
       ansible.builtin.command: ./make.sh
       args:
-        chdir: "{{ ansible_env.HOME }}/tlsh"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/tlsh"
 
     - name: System install for TLSH
       ansible.builtin.command: make install
       args:
-        chdir: "{{ ansible_env.HOME }}/tlsh/build/release/"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/tlsh/build/release/"
 
     - name: Clone pgpdump
       ansible.builtin.git:
         repo: https://github.com/kazu-yamamoto/pgpdump.git
-        dest: "{{ ansible_env.HOME }}/pgpdump"
+        dest: "{{ ansible_facts['env']['HOME'] }}/pgpdump"
 
     - name: Build pgpdump
       shell: |
@@ -101,22 +101,22 @@
         ./configure
         make
       args:
-        chdir: "{{ ansible_env.HOME }}/pgpdump"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/pgpdump"
 
     - name: System install for pgpdump
       ansible.builtin.command: make install
       args:
-        chdir: "{{ ansible_env.HOME }}/pgpdump"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/pgpdump"
 
     - name: Download yara
       ansible.builtin.get_url:
         url: "https://github.com/VirusTotal/yara/archive/v{{yara_version}}.zip"
-        dest: "{{ ansible_env.HOME }}/yara_v{{yara_version}}.zip"
+        dest: "{{ ansible_facts['env']['HOME'] }}/yara_v{{yara_version}}.zip"
 
     - name: Unzip Yara
       ansible.builtin.unarchive:
-        src: "{{ ansible_env.HOME }}/yara_v{{yara_version}}.zip"
-        dest: "{{ ansible_env.HOME }}"
+        src: "{{ ansible_facts['env']['HOME'] }}/yara_v{{yara_version}}.zip"
+        dest: "{{ ansible_facts['env']['HOME'] }}"
         remote_src: yes
 
     - name: Build Yara
@@ -125,17 +125,17 @@
         ./configure
         make
       args:
-        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/yara-{{yara_version}}"
 
     - name: System install for Yara
       ansible.builtin.command: make install
       args:
-        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/yara-{{yara_version}}"
 
     - name: Check Yara
       ansible.builtin.command: make check
       args:
-        chdir: "{{ ansible_env.HOME }}/yara-{{yara_version}}"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/yara-{{yara_version}}"
 
     - name: Run ldconfig
       ansible.builtin.command: ldconfig
@@ -205,7 +205,7 @@
   become_method: sudo
   become_user: ail
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
     gunicorn_port: 7000
@@ -229,7 +229,7 @@
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/ail-framework"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/ail-framework"
 
     - name: Clone ail
       ansible.builtin.git:

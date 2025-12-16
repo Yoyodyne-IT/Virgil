@@ -43,7 +43,7 @@
         name: playwright
 
     - name: Install system deps
-      ansible.builtin.command: "{{ ansible_env.HOME }}/.local/bin/playwright install-deps"
+      ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/playwright install-deps"
 
 - name: Create Users
   hosts: lookyloo
@@ -109,7 +109,7 @@
   become_method: sudo
   become_user: lookyloo
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
     gunicorn_port: 5100
@@ -132,22 +132,22 @@
     - name: Clone Valkey
       ansible.builtin.git:
         repo: https://github.com/valkey-io/valkey.git
-        dest: "{{ ansible_env.HOME }}/valkey"
+        dest: "{{ ansible_facts['env']['HOME'] }}/valkey"
         version: 8.1
 
     - name: Distclean valkey
       ansible.builtin.command: make distclean
       args:
-        chdir: "{{ ansible_env.HOME }}/valkey"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/valkey"
 
     - name: Build Valkey
       ansible.builtin.command: make -j2
       args:
-        chdir: "{{ ansible_env.HOME }}/valkey"
+        chdir: "{{ ansible_facts['env']['HOME'] }}/valkey"
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/lookyloo"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/lookyloo"
 
     - name: Clone Lookyloo
       ansible.builtin.git:
@@ -227,14 +227,14 @@
   become_method: sudo
   become_user: lookyloo
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
     gunicorn_port: 5200
   tasks:
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/monitoring"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/monitoring"
 
 
     - name: Clone Lookyloo Monitoring

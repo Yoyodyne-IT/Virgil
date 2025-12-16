@@ -10,14 +10,14 @@
   become_method: sudo
   become_user: lacus
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
   tasks:
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/lacus"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/lacus"
 
     - name: stop Lacus
       ansible.builtin.command: "poetry run stop"
@@ -30,14 +30,14 @@
   become_method: sudo
   become_user: lookyloo
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
   tasks:
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/lookyloo"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/lookyloo"
 
     - name: Stop Lookyloo
       ansible.builtin.command: "poetry run stop"
@@ -50,14 +50,14 @@
   become_method: sudo
   become_user: lookyloo
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
   tasks:
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/monitoring"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/monitoring"
 
     - name: Stop Lookyloo Monitoring
       ansible.builtin.command: "poetry run stop"
@@ -70,14 +70,14 @@
   become_method: sudo
   become_user: pandora
   environment:
-    PATH: "{{ ansible_env.PATH }}:{{ ansible_env.HOME }}/.local/bin"
+    PATH: "{{ ansible_facts['env'].PATH }}:{{ ansible_facts['env']['HOME'] }}/.local/bin"
   vars:
     allow_world_readable_tmpfiles: true
   tasks:
 
     - name: Set project directory
       ansible.builtin.set_fact:
-        project_dir: "{{ ansible_env.HOME }}/pandora"
+        project_dir: "{{ ansible_facts['env']['HOME'] }}/pandora"
 
     - name: Stop Pandora
       ansible.builtin.command: "poetry run stop"
