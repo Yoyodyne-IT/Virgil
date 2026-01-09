@@ -6,7 +6,7 @@ all:
       # You need to have a config file in the wireproxy directory, and the file name being <Name>.conf
       wireproxy:
         - US
-        - CA
+        - FR
     lookyloo:
       ansible_host: lookyloo-demo.yoyodyne-it.eu
     monitoring:
