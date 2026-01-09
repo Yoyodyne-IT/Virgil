@@ -2,7 +2,7 @@
 
 Virgil is a collection of playbooks to guide you through the [circles of Hell](https://en.wikipedia.org/wiki/Inferno_(Dante)).
 
-They are meant to deploy Lookyloo, Lacus, and Pandora.
+They are meant to deploy Lookyloo, Lacus, Pandora, and AIL Framework.
 
 # Requirements
 
